@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wings & Wires — Design Document</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2a;
+    --text: #c8c8d4;
+    --text-dim: #5a5a72;
+    --accent: #e8dcc8;
+    --red: #c0392b;
+    --bird: #d4a853;
+    --human: #c0392b;
+    --missing: #2a2a3a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* HEADER */
+  .doc-header {
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .doc-header .label {
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .doc-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--accent);
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .doc-header .subtitle {
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 48px;
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  .meta-item .key {
+    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .meta-item .val {
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  /* LAYOUT */
+  .doc-body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 40px 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-label {
+    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0 24px;
+    margin-bottom: 16px;
+  }
+
+  .nav-item {
+    display: block;
+    padding: 8px 24px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .nav-item:hover {
+    color: var(--accent);
+    border-left-color: var(--accent);
+  }
+
+  .nav-item.chapter {
+    color: var(--text);
+    margin-top: 8px;
+  }
+
+  .nav-indent {
+    padding-left: 36px;
+  }
+
+  .content {
+    padding: 60px 80px;
+    max-width: 860px;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin-bottom: 80px;
+    padding-bottom: 80px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section:last-child {
+    border-bottom: none;
+  }
+
+  .section-label {
+    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .section h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--accent);
+    margin-bottom: 32px;
+    line-height: 1.2;
+  }
+
+  .section h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--accent);
+    margin: 40px 0 16px;
+  }
+
+  p {
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.8;
+  }
+
+  /* OPENING TEXT DISPLAY */
+  .opening-text {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 48px;
+    margin: 32px 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--accent);
+    line-height: 1.8;
+  }
+
+  .opening-text .line-break {
+    display: block;
+    margin-top: 24px;
+  }
+
+  /* SCENE CARDS */
+  .scene {
+    border: 1px solid var(--border);
+    margin: 24px 0;
+    overflow: hidden;
+  }
+
+  .scene-header {
+    background: var(--surface);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .scene-num {
+    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+  }
+
+  .scene-title {
+    color: var(--accent);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-style: italic;
+  }
+
+  .scene-tag {
+    margin-left: auto;
+    font-size: 10px;
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  .scene-body {
+    padding: 24px;
+  }
+
+  .scene-body p {
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  /* VISUAL MOCKUP */
+  .mockup {
+    background: #080810;
+    border: 1px solid var(--border);
+    padding: 0;
+    margin: 24px 0;
+    aspect-ratio: 16/9;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mockup-map {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  /* Simplified SVG map representation */
+  .map-label {
+    position: absolute;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+  }
+
+  /* INTERACTION FLOW */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 32px 0;
+  }
+
+  .flow-step {
+    display: flex;
+    gap: 24px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .flow-step:last-child {
+    border-bottom: none;
+  }
+
+  .flow-num {
+    color: var(--text-dim);
+    font-size: 11px;
+    width: 24px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .flow-content .title {
+    color: var(--accent);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-style: italic;
+    margin-bottom: 8px;
+  }
+
+  .flow-content p {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .flow-content .tech {
+    font-size: 10px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    display: inline-block;
+    padding: 2px 8px;
+    margin-top: 4px;
+    margin-right: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  /* DATA SPEC */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 11px;
+  }
+
+  .data-table th {
+    text-align: left;
+    padding: 10px 16px;
+    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .data-table .mono {
+    font-family: 'DM Mono', monospace;
+    color: var(--bird);
+    font-size: 10px;
+  }
+
+  .data-table .missing {
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* COLOR LEGEND */
+  .legend {
+    display: flex;
+    gap: 32px;
+    margin: 24px 0;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-line {
+    width: 24px;
+    height: 2px;
+    flex-shrink: 0;
+  }
+
+  /* VOICE BLOCK */
+  .voice-block {
+    border-left: 2px solid var(--accent);
+    padding: 20px 24px;
+    margin: 24px 0;
+    background: var(--surface);
+  }
+
+  .voice-block .voice-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .voice-block p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* TECH STACK */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  .tech-card {
+    background: var(--surface);
+    padding: 20px;
+  }
+
+  .tech-card .name {
+    color: var(--accent);
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .tech-card .use {
+    color: var(--text-dim);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* TIMELINE */
+  .timeline {
+    margin: 24px 0;
+  }
+
+  .timeline-row {
+    display: flex;
+    gap: 20px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+
+  .timeline-row:last-child { border-bottom: none; }
+
+  .timeline-date {
+    color: var(--text-dim);
+    font-size: 11px;
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .timeline-content {
+    color: var(--text);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .timeline-tag {
+    display: inline-block;
+    font-size: 9px;
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    margin-left: 8px;
+    letter-spacing: 0.1em;
+    vertical-align: middle;
+  }
+
+  .tag-p04 { border-color: var(--bird); color: var(--bird); }
+
+  /* STAT ROW */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    padding: 24px;
+  }
+
+  .stat-card .num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-card .num.red { color: var(--red); }
+  .stat-card .num.bird { color: var(--bird); }
+
+  .stat-card .label {
+    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  /* STRUCTURE DIAGRAM */
+  .structure {
+    margin: 32px 0;
+  }
+
+  .struct-row {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2px;
+  }
+
+  .struct-block {
+    padding: 14px 20px;
+    font-size: 11px;
+    flex: 1;
+    position: relative;
+  }
+
+  .struct-block.opening {
+    background: #1a1a28;
+    border: 1px solid var(--border);
+    color: var(--accent);
+  }
+
+  .struct-block.ch1 {
+    background: #1a1510;
+    border: 1px solid #2a2010;
+    color: var(--bird);
+  }
+
+  .struct-block.transition {
+    background: #141420;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    flex: 0.3;
+  }
+
+  .struct-block.ch2 {
+    background: #1a1010;
+    border: 1px solid #2a1010;
+    color: var(--red);
+  }
+
+  .struct-block.ending {
+    background: #12121e;
+    border: 1px solid var(--border);
+    color: var(--accent);
+  }
+
+  .struct-block .block-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 4px;
+  }
+
+  .struct-sub {
+    margin-left: 20px;
+    margin-bottom: 2px;
+  }
+
+  .struct-sub .struct-block {
+    padding: 10px 20px;
+    font-size: 10px;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="doc-header">
+  <div class="label">Design Document · Portfolio Project P04</div>
+  <h1>Wings & Wires<br>羽与界</h1>
+  <div class="subtitle">Data Visualization · Critical Interaction · Graduate School Application</div>
+  <div class="meta-row">
+    <div class="meta-item">
+      <div class="key">Target Schools</div>
+      <div class="val">Aalto Media Lab · TU Delft · Malmö</div>
+    </div>
+    <div class="meta-item">
+      <div class="key">Stack</div>
+      <div class="val">D3.js · p5.js · Mapbox · Vercel</div>
+    </div>
+    <div class="meta-item">
+      <div class="key">Status</div>
+      <div class="val">Design Phase — April 2026</div>
+    </div>
+    <div class="meta-item">
+      <div class="key">GitHub</div>
+      <div class="val">wings-and-wires</div>
+    </div>
+  </div>
+</div>
+
+<div class="doc-body">
+
+  <!-- SIDEBAR NAV -->
+  <nav class="sidebar">
+    <div class="sidebar-label">Contents</div>
+    <a class="nav-item" href="#concept">Concept</a>
+    <a class="nav-item" href="#opening">Opening Text</a>
+    <a class="nav-item" href="#structure">Site Structure</a>
+    <a class="nav-item chapter" href="#ch1">Chapter One: Mediterranean</a>
+    <a class="nav-item nav-indent" href="#ch1-intro">Introduction</a>
+    <a class="nav-item nav-indent" href="#ch1-data">Data Body</a>
+    <a class="nav-item nav-indent" href="#ch1-voice">Your Voice</a>
+    <a class="nav-item chapter" href="#transition">Transition</a>
+    <a class="nav-item chapter" href="#ch2">Chapter Two: Americas</a>
+    <a class="nav-item" href="#ending">Ending</a>
+    <a class="nav-item" href="#visual">Visual Language</div>
+    <a class="nav-item" href="#data">Data Spec</a>
+    <a class="nav-item" href="#tech">Tech Stack</a>
+    <a class="nav-item" href="#timeline">Timeline</a>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- CONCEPT -->
+    <section class="section" id="concept">
+      <div class="section-label">01 · Concept</div>
+      <h2>What this project is about</h2>
+
+      <p>White storks migrate from Europe to Africa every year. They cross the same geography as thousands of human migrants. But only one of these migrations is fully documented — precise to the meter, precise to the second.</p>
+
+      <p>This project places both migrations on the same map. It does not editorialize. It lets the data speak through its density, its gaps, and its silence.</p>
+
+      <p>The critical argument comes from the researcher's own fieldwork in Barcelona — a city that brands itself as open, while systematically rendering certain migrations invisible. The project extends this argument from the city to the sea.</p>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="num bird">3,378</div>
+          <div class="label">Stork GPS points<br>Mediterranean region</div>
+        </div>
+        <div class="stat-card">
+          <div class="num red">23,858</div>
+          <div class="label">Recorded human deaths<br>Mediterranean, 2014–2026</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" style="color: var(--text-dim)">?</div>
+          <div class="label">Deaths with no data<br>The sea kept them</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OPENING TEXT -->
+    <section class="section" id="opening">
+      <div class="section-label">02 · Opening Text</div>
+      <h2>The words the user sees first</h2>
+
+      <p>This text appears before the map. It fades in line by line, then fades out. The map opens underneath it.</p>
+
+      <div class="opening-text">
+        The migration of birds is a map.
+        <span class="line-break">The migration of people is a gap.</span>
+        <span class="line-break">Both cross the same wind, the same sea, the same pull of the earth.</span>
+        <span class="line-break">Only one is being watched.</span>
+        <span class="line-break" style="margin-top: 40px; font-size: 18px; color: var(--text-dim)">Of the others —<br>
+        we have numbers.<br>
+        Sometimes not even those.</span>
+      </div>
+
+      <p>Animation: each line fades in at 0.8s intervals. After the last line, a 3-second pause. Then the entire text fades out slowly (2s), and the map fades in beneath it.</p>
+    </section>
+
+    <!-- SITE STRUCTURE -->
+    <section class="section" id="structure">
+      <div class="section-label">03 · Site Structure</div>
+      <h2>The complete narrative arc</h2>
+
+      <p>The site is a single continuous scroll. No navigation. The user moves through it like a film.</p>
+
+      <div class="structure">
+        <div class="struct-row">
+          <div class="struct-block opening">
+            <div class="block-label">Opening</div>
+            Text → Map appears
+          </div>
+        </div>
+
+        <div class="struct-row">
+          <div class="struct-block ch1">
+            <div class="block-label">Chapter One · Mediterranean</div>
+            Introduction · Data Body · Your Voice
+          </div>
+        </div>
+        <div class="struct-sub">
+          <div class="struct-row">
+            <div class="struct-block ch1" style="flex: 0.4">
+              <div class="block-label">Intro</div>
+              Bird flies west line
+            </div>
+            <div class="struct-block ch1" style="margin-left: 2px; flex: 0.6">
+              <div class="block-label">Trigger</div>
+              Turns at Gibraltar → sea darkens → user clicks
+            </div>
+          </div>
+          <div class="struct-row" style="margin-top: 2px;">
+            <div class="struct-block ch1">
+              <div class="block-label">Data Body · 4 Cuts</div>
+              Scale · Density contrast · Missing data · Your voice
+            </div>
+          </div>
+        </div>
+
+        <div class="struct-row" style="margin-top: 2px;">
+          <div class="struct-block transition">
+            <div class="block-label">Transition</div>
+            Map pulls back
+          </div>
+        </div>
+
+        <div class="struct-row" style="margin-top: 2px;">
+          <div class="struct-block ch2">
+            <div class="block-label">Chapter Two · Americas</div>
+            Same structure · Different geography
+          </div>
+        </div>
+
+        <div class="struct-row" style="margin-top: 2px;">
+          <div class="struct-block ending">
+            <div class="block-label">Ending</div>
+            Both chapters side by side · Opening text returns
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHAPTER ONE -->
+    <section class="section" id="ch1">
+      <div class="section-label">04 · Chapter One</div>
+      <h2>Mediterranean</h2>
+
+      <h3 id="ch1-intro">Introduction sequence</h3>
+
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-num">01</div>
+          <div class="flow-content">
+            <div class="title">Map opens. One bird.</div>
+            <p>The map fades in showing Europe and North Africa. A single white stork begins its journey from southern Germany. Its GPS trail grows slowly — not animated at full speed, but at a pace the user can follow. The rest of the map is empty.</p>
+            <span class="tech">D3 path transition</span>
+            <span class="tech">Mapbox GL</span>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">02</div>
+          <div class="flow-content">
+            <div class="title">France. Spain. The coast.</div>
+            <p>The trail moves south through France, into the Iberian Peninsula. The user is following. No text. No explanation. Just the bird and the map. Barcelona is visible on the coastline — no label, but it is there.</p>
+            <span class="tech">Scroll-triggered animation</span>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">03</div>
+          <div class="flow-content">
+            <div class="title">Gibraltar. The bird turns.</div>
+            <p>The trail reaches the Strait of Gibraltar — 14km of water. The bird does not cross. It turns, follows the land edge. At this exact moment, the sea surface begins to change color — barely perceptible, a darkening. No text appears yet. The user senses something but does not know what.</p>
+            <span class="tech">CSS color transition on SVG layer</span>
+            <span class="tech">Opacity: 0 → 0.15</span>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">04</div>
+          <div class="flow-content">
+            <div class="title">Visual pull. User clicks.</div>
+            <p>The darkened area on the sea pulses very gently — not a blinking indicator, more like breathing. No cursor change, no label. The user is drawn to it. When they click, the camera begins a slow push toward the sea surface.</p>
+            <span class="tech">CSS keyframe pulse · opacity 0.15 → 0.25 → 0.15</span>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">05</div>
+          <div class="flow-content">
+            <div class="title">Time axis appears. User drags.</div>
+            <p>The map has pushed in to show only the Mediterranean. A minimal time axis appears at the bottom: 2014 — 2026. The sea is still just a dark color, no data points yet. As the user drags the slider forward, the color deepens. The area grows. The user does not yet know what they are accumulating.</p>
+            <span class="tech">D3 range input · color interpolation</span>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">06</div>
+          <div class="flow-content">
+            <div class="title">Slider reaches today. Revelation.</div>
+            <p>When the slider hits the rightmost position, the color holds for 2 seconds. Then a single number appears in the center of the sea:</p>
+            <div style="font-family: 'Cormorant Garamond', serif; font-size: 28px; font-style: italic; color: #c0392b; margin: 16px 0;">23,858</div>
+            <p>Below it, two lines of text fade in slowly:</p>
+            <div style="font-family: 'Cormorant Garamond', serif; font-size: 15px; font-style: italic; color: var(--text-dim); margin: 12px 0; line-height: 1.8;">This is what we recorded.<br>The rest, the sea kept.</div>
+            <p>Then the color dissolves into individual data points — each point one death record. Filled circles have counts. Empty circles are missing data.</p>
+            <span class="tech">D3 force simulation · enter() transition</span>
+          </div>
+        </div>
+      </div>
+
+      <h3 id="ch1-data">Data body — four cuts</h3>
+
+      <div class="scene">
+        <div class="scene-header">
+          <div class="scene-num">CUT 01</div>
+          <div class="scene-title">Scale — the accumulation over time</div>
+          <div class="scene-tag">CHART</div>
+        </div>
+        <div class="scene-body">
+          <p>A minimal line chart showing monthly death counts from 2014 to 2026. The x-axis is time. The y-axis has no label — just the shape of the data. Peak months are marked with a dot. The chart does not explain itself.</p>
+          <p>Below the chart: total recorded deaths by route (Western / Central / Eastern Med), shown as three stacked numbers. No bar chart. Just numbers in space.</p>
+        </div>
+      </div>
+
+      <div class="scene">
+        <div class="scene-header">
+          <div class="scene-num">CUT 02</div>
+          <div class="scene-title">Density contrast — the same map, two data sets</div>
+          <div class="scene-tag">MAP</div>
+        </div>
+        <div class="scene-body">
+          <p>The Mediterranean map returns, now showing both data layers simultaneously. Stork GPS points in amber — thousands of them, precise, individual. Human death records in dark red — three approximate points, one per route.</p>
+          <p>The visual argument is immediate: one data set covers the map like a constellation. The other barely exists.</p>
+          <p>User can toggle between layers. No animation — just instant switch. The contrast is the content.</p>
+        </div>
+      </div>
+
+      <div class="scene">
+        <div class="scene-header">
+          <div class="scene-num">CUT 03</div>
+          <div class="scene-title">Missing data — what the sea kept</div>
+          <div class="scene-tag">CRITICAL CORE</div>
+        </div>
+        <div class="scene-body">
+          <p>A grid of all 324 death records. Each record is a small square. Squares with data are filled (dark red). Squares without precise coordinates are outlined only — hollow. A label appears: <em>"Location: estimated. Coordinates: not available."</em></p>
+          <p>Hovering over any square shows what information exists and what does not. The absence is as visible as the presence.</p>
+          <p>This is the most critical section of the entire project. The missing data is not a gap in the visualization — it is the visualization.</p>
+        </div>
+      </div>
+
+      <h3 id="ch1-voice">Your voice — the researcher's perspective</h3>
+
+      <p>After the data cuts, the map fades slightly. A block of text appears — not academic, not explanatory. A moment from your fieldwork in Barcelona.</p>
+
+      <div class="voice-block">
+        <div class="voice-label">Field note · Barcelona · October 2025</div>
+        <p>I needed to duplicate a set of keys. I walked past three different shops selling beautifully designed keychains. I had to walk four blocks out of the gentrified zone to find an actual locksmith. The city had been redesigned for consumption, not for the people who live here. Some things are made visible. Others are not. The choice is never neutral.</p>
+      </div>
+
+      <p>This fragment does not explain the data. It creates a resonance — the logic of selective visibility that you identified in Barcelona is the same logic at work in the Mediterranean data. The user makes the connection themselves.</p>
+    </section>
+
+    <!-- TRANSITION -->
+    <section class="section" id="transition">
+      <div class="section-label">05 · Transition</div>
+      <h2>Between the two chapters</h2>
+
+      <p>The map zooms out slowly until both the Mediterranean and the Americas are visible in the same frame. No text. The user sees the scale of what they are about to enter.</p>
+
+      <p>A single horizontal line crosses the screen — the equator. Then the camera moves west.</p>
+    </section>
+
+    <!-- CHAPTER TWO -->
+    <section class="section" id="ch2">
+      <div class="section-label">06 · Chapter Two</div>
+      <h2>Americas</h2>
+
+      <p>The same structure as Chapter One, but different geography and different data.</p>
+
+      <p>A Swainson's Hawk begins its migration from North America, moving south. The US-Mexico border appears as a line. The bird crosses it without stopping. Then the human data emerges — CBP encounter data, UNHCR Central American migration figures.</p>
+
+      <p>The researcher's voice returns — this time connecting the Americas data to the broader argument: the border is a line that exists for some species and not others. The data gap here is even larger. The political stakes are different but the logic is identical.</p>
+
+      <div class="voice-block">
+        <div class="voice-label">Researcher's note · Chapter Two</div>
+        <p>Bad Bunny performed at the Latin Grammys the same year record numbers of Central Americans were recorded crossing the desert. One image circulated globally. The other was a number in a database. Both were real. Only one was watched.</p>
+      </div>
+    </section>
+
+    <!-- ENDING -->
+    <section class="section" id="ending">
+      <div class="section-label">07 · Ending</div>
+      <h2>The two chapters, side by side</h2>
+
+      <p>The screen splits. Mediterranean on the left. Americas on the right. Both maps show only the human death data — no birds. The density gaps are visible across both geographies simultaneously.</p>
+
+      <p>The opening text returns, this time smaller, quieter, at the bottom of the screen:</p>
+
+      <div class="opening-text" style="font-size: 16px; padding: 32px;">
+        The migration of birds is a map.<br>
+        The migration of people is a gap.<br>
+        <span style="color: var(--text-dim); font-size: 14px; display: block; margin-top: 20px;">
+        Both cross the same wind, the same sea, the same pull of the earth.<br>
+        Only one is being watched.
+        </span>
+      </div>
+
+      <p>No call to action. No links. The page ends here.</p>
+    </section>
+
+    <!-- VISUAL LANGUAGE -->
+    <section class="section" id="visual">
+      <div class="section-label">08 · Visual Language</div>
+      <h2>Color, type, motion</h2>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-line" style="background: #d4a853;"></div>
+          Stork GPS trail
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #d4a853;"></div>
+          Stork position point
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #c0392b;"></div>
+          Death record (with count)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: transparent; border: 1px solid #c0392b;"></div>
+          Death record (no data)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #1a1a2e;"></div>
+          Sea (accumulating)
+        </div>
+      </div>
+
+      <h3>Typography</h3>
+      <p><strong style="color: var(--accent)">Display / Poetic text:</strong> Cormorant Garamond, italic, light weight. Used for opening text, chapter headings, voice blocks, and the revelation moment.</p>
+      <p><strong style="color: var(--accent)">Data / Interface text:</strong> DM Mono, regular weight. Used for labels, counts, axis values, and technical annotations.</p>
+      <p>Nothing else. Two fonts only.</p>
+
+      <h3>Motion principles</h3>
+      <p>All animations are slow. The bird trail grows at walking pace, not flight speed. Data points appear with a fade, not a pop. The camera moves like breath — unhurried. The only moment of stillness is the revelation: 23,858 appears with no animation. It simply exists.</p>
+
+      <h3>Map style</h3>
+      <p>Dark basemap. No labels except coastlines. Country borders are visible but thin — present, but not the point. The sea is the canvas, not the background.</p>
+    </section>
+
+    <!-- DATA SPEC -->
+    <section class="section" id="data">
+      <div class="section-label">09 · Data</div>
+      <h2>What we have and what it means</h2>
+
+      <table class="data-table">
+        <tr>
+          <th>Dataset</th>
+          <th>Source</th>
+          <th>Key fields</th>
+          <th>Limitation</th>
+        </tr>
+        <tr>
+          <td>White Stork GPS<br>(Mediterranean)</td>
+          <td>Movebank / LifeTrack<br>Bontekoe et al. 2023</td>
+          <td class="mono">timestamp<br>location-lat<br>location-long<br>individual-id</td>
+          <td class="missing">None significant. 3,378 points after downsampling to daily resolution.</td>
+        </tr>
+        <tr>
+          <td>Mediterranean<br>Missing Migrants</td>
+          <td>IOM Missing Migrants<br>Project, 2014–2026</td>
+          <td class="mono">year, month<br>route<br>field_count<br>field_activity</td>
+          <td class="missing">No precise coordinates. Location is route-level only (Western / Central / Eastern Med). This is the critical gap the project visualizes.</td>
+        </tr>
+        <tr>
+          <td>Americas Bird<br>Migration</td>
+          <td>Movebank<br>(to be downloaded)</td>
+          <td class="mono">timestamp<br>location-lat<br>location-long</td>
+          <td class="missing">Pending download. Target species: Swainson's Hawk.</td>
+        </tr>
+        <tr>
+          <td>US-Mexico Border<br>Crossing Data</td>
+          <td>CBP / UNHCR<br>(to be downloaded)</td>
+          <td class="mono">TBD</td>
+          <td class="missing">Pending. Will mirror Mediterranean structure.</td>
+        </tr>
+      </table>
+
+      <p>All processed data lives in <span class="mono" style="font-size: 11px; color: var(--bird)">data/processed/</span> as GeoJSON. Raw data is in <span class="mono" style="font-size: 11px; color: var(--bird)">data/raw/</span> and gitignored.</p>
+    </section>
+
+    <!-- TECH STACK -->
+    <section class="section" id="tech">
+      <div class="section-label">10 · Tech Stack</div>
+      <h2>How it will be built</h2>
+
+      <div class="tech-grid">
+        <div class="tech-card">
+          <div class="name">Mapbox GL JS</div>
+          <div class="use">Base map, camera animation, layer management. Dark custom style.</div>
+        </div>
+        <div class="tech-card">
+          <div class="name">D3.js</div>
+          <div class="use">Data binding, path transitions, time axis, density visualization, chart cuts.</div>
+        </div>
+        <div class="tech-card">
+          <div class="name">p5.js</div>
+          <div class="use">Bird trail animation, particle effects, the sea color accumulation layer.</div>
+        </div>
+        <div class="tech-card">
+          <div class="name">Python</div>
+          <div class="use">Data processing scripts (already written). Outputs GeoJSON for D3.</div>
+        </div>
+        <div class="tech-card">
+          <div class="name">Vercel</div>
+          <div class="use">Deployment. Single-page static site. No backend needed.</div>
+        </div>
+        <div class="tech-card">
+          <div class="name">Vanilla JS</div>
+          <div class="use">Scroll detection, interaction logic, animation orchestration. No framework.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIMELINE -->
+    <section class="section" id="timeline">
+      <div class="section-label">11 · Timeline</div>
+      <h2>When things need to happen</h2>
+
+      <div class="timeline">
+        <div class="timeline-row">
+          <div class="timeline-date">Now — May</div>
+          <div class="timeline-content">
+            Data processing complete ✓ · Design document complete ✓ · Begin building map base and bird trail animation
+            <span class="timeline-tag tag-p04">P04</span>
+          </div>
+        </div>
+        <div class="timeline-row">
+          <div class="timeline-date">June — July</div>
+          <div class="timeline-content">
+            Mediterranean chapter complete · User testing (5 people) · Begin Americas data collection
+          </div>
+        </div>
+        <div class="timeline-row">
+          <div class="timeline-date">August — October</div>
+          <div class="timeline-content">
+            Americas chapter · Full site integration · Visual polish · Deploy to Vercel · Final user testing (8 people)
+          </div>
+        </div>
+        <div class="timeline-row">
+          <div class="timeline-date">November</div>
+          <div class="timeline-content">
+            Site locked. Portfolio documentation. Three versions for different schools.
+          </div>
+        </div>
+        <div class="timeline-row">
+          <div class="timeline-date">December</div>
+          <div class="timeline-content">
+            Applications submitted.
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
