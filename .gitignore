@@ -1,0 +1,11 @@
+# Raw data files (too large for GitHub)
+data/raw/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.env
